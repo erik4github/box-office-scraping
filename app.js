@@ -21,6 +21,9 @@ const incrementalSums = (dailySums, emptyArray) => dailySums.reduce((previousVal
     return sum;
 }, 0);
 
+// pushing currentvalue gets the individual days
+// although stringsToNumbers would also be the individual days?
+
 const parseData = (data) => {
     const arrayToChart = [];
     const alignedBoxOfficeNumbers = slicer(data, shortest).map(stringsToNumbers);
@@ -28,32 +31,38 @@ const parseData = (data) => {
     return arrayToChart;
 }
 
+
 document.addEventListener('DOMContentLoaded', function () {
     Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
         return '$' + tooltipItem.yLabel.toLocaleString("en-US");
     };
     const ctx = document.getElementById("myChart").getContext('2d');
+    
+    const grd = ctx.createLinearGradient(0, 0, window.innerWidth || document.body.clientWidth, 0);
 
-    const dataToChart = movieJSON.map(([key, value]) => {
+    // Add colors
+    grd.addColorStop(0.000, 'rgba(63,94,251, 1.000)');
+    grd.addColorStop(1.000, 'rgba(252,70,107, 1.000)');
+
+    const colors = [grd, 'blue', 'yellow', 'green']
+
+    const dataToChart = movieJSON.map(([key, value], index) => {
         return {
             label: key,
             data: parseData(value),
-            borderColor: 'rgba(135, 220, 90, 1.000)',
-            pointBackgroundColor: 'rgba(254, 254, 254, 1.000)',
-            pointBorderWidth: 10,
-            pointHoverRadius: 10,
-            pointHoverBorderWidth: 1,
-            pointRadius: 3,
+            backgroundColor: [...colors][index],
+            borderColor: [...colors][index]
         }
     })
 
+    console.log(dataToChart);
+
     const chartData = {
-        datasets: dataToChart,
         labels: days(shortest),
+        datasets: dataToChart,
         type: 'line',
         borderWidth: 1
     }
-    
     const myChart = new Chart(ctx, {
         type: 'line',
         data: chartData,
