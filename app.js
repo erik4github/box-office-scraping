@@ -1,5 +1,5 @@
-const json = require("./data/movies.json");
-const chartjs = require("chart.js");
+const json = require('./data/movies.json');
+const Chart = require('chart.js');
 
 const movieJSON = Object.entries(json)
 const allBoxOfficeNumbers = Object.values(json);
@@ -11,7 +11,7 @@ const shortest = allBoxOfficeNumbers.reduce(
 
 const days = (array) => array.map((v, index) => index + 1)
 
-const stringsToNumbers = (strings) => Number(strings.replace(/[^0-9\.-]+/g, ""));
+const stringsToNumbers = (strings) => Number(strings.replace(/[^0-9\.-]+/g, ''));
 
 const slicer = (number, shortestArray) => number.slice(0, shortestArray.length);
 
@@ -31,13 +31,16 @@ const parseData = (data) => {
     return arrayToChart;
 }
 
-
 document.addEventListener('DOMContentLoaded', function () {
     Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
-        return '$' + tooltipItem.yLabel.toLocaleString("en-US");
+        return '$' + tooltipItem.yLabel.toLocaleString('en-US');
     };
-    const ctx = document.getElementById("myChart").getContext('2d');
-    
+    Chart.defaults.global.defaultFontColor = '#ffffff';
+    Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
+        return 'Day' + tooltipItem.xLabel;
+    }
+    const ctx = document.getElementById('myChart').getContext('2d');
+
     const grd = ctx.createLinearGradient(0, 0, window.innerWidth || document.body.clientWidth, 0);
 
     // Add colors
@@ -71,15 +74,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 yAxes: [{
                     ticks: {
                         beginAtZero: true,
-                        callback: function (value, index, values) {
-                            return '$' + value.toLocaleString('en-US');
-                        }
+                        callback: (value, index, values) => '$' + value.toLocaleString('en-US')
                     }
                 }]
             },
             elements: {
                 line: {
                     fill: false
+                }
+            },
+            legend: {
+                position: 'right',
+                labels: {
+                    padding: 40,
+                    fontSize: 16,
+                    fontColor: 'white'
+                }
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: true,
+                itemSort: (a, b, data) => b.yLabel - a.yLabel,
+                callbacks: {
+                    title: ([tooltipItems], data) => 'Day ' + tooltipItems.xLabel,
+                    label: (tooltipItems, data) => data.datasets[tooltipItems.datasetIndex].label + ': ' + '$' + tooltipItems.yLabel.toLocaleString('en-US')
                 }
             }
         }
